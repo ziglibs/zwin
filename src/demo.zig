@@ -7,11 +7,11 @@ var gdi: zwin.gdi.Graphics = undefined;
 
 fn eventHandler(window: zwin.Window, event: zwin.WindowEvent) void {
     switch (event) {
-        // .paint => {
-            // window.hide();
-        // },
+        .paint => {window.handlePaint();},
+        .timer => |timer| {
+            std.debug.warn("{}\n", .{timer});
+        },
         .mouse_move => |pos| {
-
             gdi.begin();
 
             if (x == 0 and y == 0) {
@@ -40,6 +40,8 @@ pub fn main() !void {
     };
     var window = try zwin.createWindow(a);
     gdi = zwin.gdi.init(&window);
+
+    window.setTimer(420, 1000);
 
     window.run();
 }

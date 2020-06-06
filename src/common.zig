@@ -6,7 +6,8 @@ pub const Position = struct {
 pub const WindowEvent = union(enum) {
     paint,
     render,
-    mouse_move: Position
+    mouse_move: Position,
+    timer: c_ulonglong
 };
 
 pub const Color = struct {

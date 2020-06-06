@@ -43,6 +43,20 @@ pub const Window = struct {
             _ = DispatchMessage(&msg);
         }
     }
+
+    pub fn handlePaint(self: Self) void {
+        var ps: PAINTSTRUCT = undefined;
+        var hdc = BeginPaint(self.handle, &ps);
+
+        var a: c_uint = COLOR_WINDOW + 1;
+        _ = FillRect(hdc, &ps.rcPaint, @ptrCast([*c]struct_HBRUSH__, &a));
+
+        _ = EndPaint(self.handle, &ps);
+    }
+
+    pub fn setTimer(self: Self, id: c_uint, delay: c_uint) void {
+        _ = SetTimer(self.handle, id, delay, null);
+    }
 };
 
 var handleWindowMap = std.AutoHashMap(HWND, Window).init(std.heap.c_allocator);
@@ -55,17 +69,11 @@ fn WindowProc(hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM) callconv(.
                 PostQuitMessage(0);
                 return 0;
             },
+            WM_TIMER => {
+                window.info.event_handler(window, .{ .timer = wParam });
+            },
             WM_PAINT => {
-                std.debug.warn("{}", .{1});
-                var ps: PAINTSTRUCT = undefined;
-                var hdc = BeginPaint(hwnd, &ps);
-
-                var a: c_uint = COLOR_WINDOW + 1;
-                _ = FillRect(hdc, &ps.rcPaint, @ptrCast([*c]struct_HBRUSH__, &a));
-
-                _ = EndPaint(hwnd, &ps);
-
-                // window.info.event_handler(window, .paint);
+                window.info.event_handler(window, .paint);
             },
             WM_MOUSEMOVE => {
                 window.info.event_handler(window, .{ .mouse_move = .{
